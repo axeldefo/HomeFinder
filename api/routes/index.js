@@ -1,8 +1,11 @@
+//Index file for all routes
+
 var express = require('express');
 var router = express.Router();
 var usersRouter = require('./users');
 var dpeRouter = require('./dpe');
 var authRouter = require('./auth');
+
 
  router.use('/auth', authRouter);
 router.use('/dpe', dpeRouter);

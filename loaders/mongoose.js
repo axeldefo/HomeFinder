@@ -29,7 +29,7 @@ if (process.env.NODE_ENV === 'development') {
 exports.connect = async function () {
   // Connect to database
   try {
-    await mongoose.connect(mongo.uri, mongo.options);
+    await mongoose.connect(mongo.uri, { serverSelectionTimeoutMS: 6000000 });
 
     mongoose.connection.on('disconnected', error => {
         debug('Error: disconnected!\r\n' + error);

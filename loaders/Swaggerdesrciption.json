@@ -1,0 +1,718 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "API DPE",
+      "version": "1.0.0",
+      "description": "API for DPE project authentication"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "Authorization": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    },
+    "security": [
+      {
+        "Authorization": []
+      }
+    ],
+    "paths": {
+      "/api/v1/auth/register": {
+        "post": {
+          "summary": "Register a new user",
+          "description": "Register a new user.",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "example": {
+                    "name": "Bleu B",
+                    "email": "bleu.b@example.com",
+                    "password": "Password123"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "User registered successfully"
+            },
+            "400": {
+              "description": "Bad request, email already exists or missing fields"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/auth/login": {
+        "post": {
+          "summary": "Login",
+          "description": "Authenticate and get access and refresh tokens.",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "example": {
+                    "email": "bleu.b@example.com",
+                    "password": "Password123"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "accessToken": "your_access_token",
+                    "refreshToken": "your_refresh_token"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid credentials"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/auth/refresh": {
+        "post": {
+          "summary": "Refresh Access Token",
+          "description": "Refresh the access token using a valid refresh token.",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "example": {
+                  "refreshToken": "your_refresh_token"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Access token refreshed successfully",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "accessToken": "your_new_access_token"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid refresh token"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/dpe": {
+        "get": {
+          "summary": "Get all DPE records",
+          "description": "Retrieve all DPE records.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "DPE records retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": [
+                      {
+                        "N°_département_(BAN)": 72,
+                        "Date_réception_DPE": "2022-01-01",
+                        "Date_établissement_DPE": "2021-12-01",
+                        "Date_visite_diagnostiqueur": "2021-11-01",
+                        "Etiquette_GES": "A",
+                        "Etiquette_DPE": "B",
+                        "Année_construction": 2000,
+                        "Surface_habitable_logement": 120,
+                        "Adresse_(BAN)": "123 Main St",
+                        "Code_postal_(BAN)": 12345
+                      }
+                    ]
+                },
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "N°_département_(BAN)": {
+                            "type": "integer"
+                            },
+                            "Date_réception_DPE": {
+                            "type": "string"
+                            },
+                            "Date_établissement_DPE": {
+                            "type": "string"
+                            },
+                            "Date_visite_diagnostiqueur": {
+                            "type": "string"
+                            },
+                            "Etiquette_GES": {
+                            "type": "string"
+                            },
+                            "Etiquette_DPE": {
+                            "type": "string"
+                            },
+                            "Année_construction": {
+                            "type": "integer"
+                            },
+                            "Surface_habitable_logement": {
+                            "type": "integer"
+                            },
+                            "Adresse_(BAN)": {
+                            "type": "string"
+                            },
+                            "Code_postal_(BAN)": {
+                            "type": "integer"
+                            }
+                        }
+                        
+                    },
+                    "maxItems": 10
+                  }
+                  
+                }
+              }
+            },
+            "404": {
+              "description": "No DPE records found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/dpe/search": {
+        "get": {
+          "summary": "Search for DPE records",
+          "description": "Search for DPE records based on parameters.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "codep",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Code postal"
+            },
+            {
+              "name": "dpe",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette DPE"
+            },
+            {
+              "name": "ges",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette GES"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "DPE records retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": [
+                    {
+                      "N°_département_(BAN)": 72,
+                      "Date_réception_DPE": "2022-01-01",
+                      "Date_établissement_DPE": "2021-12-01",
+                      "Date_visite_diagnostiqueur": "2021-11-01",
+                      "Etiquette_GES": "A",
+                      "Etiquette_DPE": "B",
+                      "Année_construction": 2000,
+                      "Surface_habitable_logement": 120,
+                      "Adresse_(BAN)": "123 Main St",
+                      "Code_postal_(BAN)": 12345
+                    }
+                  ]
+                }
+              }
+            },
+            "404": {
+              "description": "No DPE records found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/dpe/searchPlus": {
+        "get": {
+          "summary": "Advanced search for DPE records",
+          "description": "Advanced search for DPE records based on parameters.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "codep",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Code postal"
+            },
+            {
+              "name": "dpe",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette DPE"
+            },
+            {
+              "name": "ges",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette GES"
+            },
+            {
+              "name": "superficie",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Superficie"
+            },
+            {
+              "name": "date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Date"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "DPE records retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "results": [
+                      {
+                        "N°_département_(BAN)": 72,
+                        "Date_réception_DPE": "2022-01-01",
+                        "Date_établissement_DPE": "2021-12-01",
+                        "Date_visite_diagnostiqueur": "2021-11-01",
+                        "Etiquette_GES": "A",
+                        "Etiquette_DPE": "B",
+                        "Année_construction": 2000,
+                        "Surface_habitable_logement": 120,
+                        "Adresse_(BAN)": "123 Main St",
+                        "Code_postal_(BAN)": 12345
+                      }
+                    ],
+                    "title": "Recherche de la géolocalisation : code postal = {codep}, DPE = {dpe}, GES = {ges}, superficie = {superficie}, date = {date}"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No DPE records found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/dpe/geolocation": {
+        "get": {
+          "summary": "Get geolocation of DPE records",
+          "description": "Get geolocation of DPE records based on parameters.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "codep",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Code postal"
+            },
+            {
+              "name": "dpe",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette DPE"
+            },
+            {
+              "name": "ges",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette GES"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Geolocation retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": [
+                    {
+                      "latitude": 48.8566,
+                      "longitude": 2.3522
+                    }
+                  ]
+                }
+              }
+            },
+            "404": {
+              "description": "No geolocation found for specified parameters"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/dpe/geolocationPlus": {
+        "get": {
+          "summary": "Advanced geolocation of DPE records",
+          "description": "Advanced geolocation of DPE records based on parameters.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "codep",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Code postal"
+            },
+            {
+              "name": "dpe",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette DPE"
+            },
+            {
+              "name": "ges",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Etiquette GES"
+            },
+            {
+              "name": "superficie",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Superficie"
+            },
+            {
+              "name": "date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Date"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Geolocation retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": [
+                    {
+                      "latitude": 48.8566,
+                      "longitude": 2.3522
+                    }
+                  ]
+                }
+              }
+            },
+            "404": {
+              "description": "No geolocation found for specified parameters"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/dpe/immonot": {
+        "get": {
+          "summary": "Extract data from Immonot website",
+          "description": "Extract DPE (Diagnostic de Performance Énergétique) data from a specified Immonot URL.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "url",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "URL of the Immonot property listing"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Data extraction successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "geolocation": [
+                      {
+                        "latitude": 48.8588442,
+                        "longitude": 2.2943506
+                      },
+                      {
+                        "latitude": 51.5073509,
+                        "longitude": -0.1277583
+                      }
+                    ],
+                    "dpe": "C",
+                    "ges": "D",
+                    "surface": 120,
+                    "date": "2022-01-17"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },      
+      "/api/v1/users/me": {
+        "get": {
+          "summary": "Get user information",
+          "description": "Retrieve information about the authenticated user.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "User information retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "savedSearches": [
+                      {
+                        "searchNumber": 1,
+                        "result": {},
+                        "title": "Search title"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "User not found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/users/research": {
+        "get": {
+          "summary": "Get all saved search results",
+          "description": "Retrieve all saved search results for the authenticated user.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Saved search results retrieved successfully",
+              "content": {
+                "application/json": {
+                  "example": [
+                    {
+                      "searchNumber": 1,
+                      "result": {},
+                      "title": "Search title"
+                    }
+                    
+                  ]
+                }
+              }
+            },
+            "404": {
+              "description": "No saved search results found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/users/del/{id}": {
+        "delete": {
+          "summary": "Delete a saved search result",
+          "description": "Delete a saved search result for the authenticated user.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "ID of the saved search result to delete"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Saved search result deleted successfully",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Search result deleted successfully"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Saved search result not found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/api/v1/users/relaunch/{searchNumber}": {
+        "get": {
+          "summary": "Relaunch a saved search",
+          "description": "Relaunch a saved search for the authenticated user.",
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "searchNumber",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Number of the saved search to relaunch"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Search relaunched successfully",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "cp": "12345",
+                    "DPE": "A",
+                    "GES": "B",
+                    "superficie": "120",
+                    "date": "2021-01-01",
+                    "title": "Search title"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Saved search not found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  

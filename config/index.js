@@ -16,7 +16,7 @@ module.exports =  {
     mongo: {
         uri : process.env.MONGO_URI,
         options: {
-          minPoolSize: 20,
+          minPoolSize: 200,
           socketTimeoutMS: 600000,
         },
     },

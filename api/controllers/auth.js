@@ -1,4 +1,6 @@
-const e = require('express');
+// Auth controller
+
+const express = require('express');
 const authService = require('../../services/auth');
 
 exports.register = async (req, res) => {
@@ -15,24 +17,28 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    console.log("login");
+  console.log("login");
   try {
-    const { email, password } = req.body;
-    const result = await authService.authenticateUser(email, password);
-    res.status(result.status).json(result.data);
+      const { email, password } = req.body;
+      const result = await authService.login(email, password);
+
+      // Si tout se passe bien, renvoyer une réponse avec le statut 200
+      res.status(200).json(result);
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+      console.error('Login error:', error);
+
+      // Gérer les erreurs ici et renvoyer la réponse appropriée
+      res.status(401).json({ error: 'Login failed' });
   }
 };
-
 exports.refresh = async (req, res) => {
+    console.log("refresh");
   try {
     const { refreshToken } = req.body;
     const result = await authService.refreshToken(refreshToken);
     res.status(result.status).json(result.data);
   } catch (error) {
-    console.error('Refresh token error:', error);
-    res.status(500).json({ error: 'Refresh token failed' });
+    console.error('Refresh error:', error);
+    res.status(500).json({ error: 'Refresh failed' });
   }
 };
