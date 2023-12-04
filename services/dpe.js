@@ -6,6 +6,14 @@ const UserModel = require('../models/users');
 const cheerio = require('cheerio');
 const moment = require('moment');
 
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+
 exports.readAllDpe = async () => {
 
     const results = await Dpe.find({});
@@ -45,25 +53,38 @@ const readDpePlus = async (cp, DPE, GES, superficie, date) => {
             title = title + `, superficie = ${superficie}`;
             const superficieNum = parseFloat(superficie);
 
-            const superficieMin = superficieNum - 5;
-            const superficieMax = superficieNum + 5;
-            console.log('superficieMax:', superficieMax);
+            const superficieMin = superficieNum *(1 - 0.2);
+            const superficieMax = superficieNum *(1 + 0.2);
+            console.log('superficieMax:', superficieMax, superficieMin);
             query["Surface_habitable_logement"] = { $gte: superficieMin, $lte: superficieMax };
         }
 
         // Ajouter la condition pour la date si elle est fournie
         if (date !== undefined) {
             title = title + `, date = ${date}`;
+            const dateObj = new Date(date);
+
+            // Calculer les dates 10 jours avant et après la date fournie
+            const startDate = new Date(dateObj);
+            startDate.setDate(startDate.getDate() - 2);
+
+            const endDate = new Date(dateObj);
+            endDate.setDate(endDate.getDate() + 2);
+
+            const formattedStartDate = formatDate(startDate);
+            const formattedEndDate = formatDate(endDate);
+
+            // Utiliser les dates formatées dans la requête
             query.$or = [
-                { "Date_réception_DPE": date},
-                { "Date_établissement_DPE": date  },
-                { "Date_visite_diagnostiqueur": date }
+                { "Date_réception_DPE": { $gte: formattedStartDate, $lte: formattedEndDate } },
+                { "Date_établissement_DPE": { $gte: formattedStartDate, $lte: formattedEndDate } },
+                { "Date_visite_diagnostiqueur": { $gte: formattedStartDate, $lte: formattedEndDate } }
             ];
         }
 
          // Exécuter la requête avec le tri par rapport a la valeur de superficie
          // Exécuter la requête
-         console.log(query);
+         //console.log(query);
         let results = await Dpe.find(query);
         console.log(results.length);
         // Trier les résultats par proximité avec la superficie fournie
@@ -92,27 +113,41 @@ exports.readDpePlus = async (cp, DPE, GES, superficie, date, email) => {
             "Etiquette_GES": GES,
         };
 
-         // Ajouter la condition pour la superficie si elle est fournie
-        if (superficie !== undefined) {
+          // Ajouter la condition pour la superficie si elle est fournie
+          if (superficie !== undefined) {
 
             title = title + `, superficie = ${superficie}`;
             const superficieNum = parseFloat(superficie);
 
-            const superficieMin = superficieNum - 10;
-            const superficieMax = superficieNum + 10;
-            console.log('superficieMax:', superficieMax);
+            const superficieMin = superficieNum *(1 - 0.2);
+            const superficieMax = superficieNum *(1 + 0.2);
+            console.log('superficieMax:', superficieMax, superficieMin);
             query["Surface_habitable_logement"] = { $gte: superficieMin, $lte: superficieMax };
         }
 
         // Ajouter la condition pour la date si elle est fournie
         if (date !== undefined) {
             title = title + `, date = ${date}`;
+            const dateObj = new Date(date);
+
+            // Calculer les dates 10 jours avant et après la date fournie
+            const startDate = new Date(dateObj);
+            startDate.setDate(startDate.getDate() - 10);
+
+            const endDate = new Date(dateObj);
+            endDate.setDate(endDate.getDate() + 10);
+
+            const formattedStartDate = formatDate(startDate);
+            const formattedEndDate = formatDate(endDate);
+
+            // Utiliser les dates formatées dans la requête
             query.$or = [
-                { "Date_réception_DPE": date},
-                { "Date_établissement_DPE": date  },
-                { "Date_visite_diagnostiqueur": date }
+                { "Date_réception_DPE": { $gte: formattedStartDate, $lte: formattedEndDate } },
+                { "Date_établissement_DPE": { $gte: formattedStartDate, $lte: formattedEndDate } },
+                { "Date_visite_diagnostiqueur": { $gte: formattedStartDate, $lte: formattedEndDate } }
             ];
         }
+        console.log(query);
 
          // Exécuter la requête avec le tri par rapport a la valeur de superficie
          // Exécuter la requête
@@ -207,28 +242,28 @@ exports.getGeolocationPlus = async (cp, DPE, GES, superficie, date, email) => {
     
     try {
         const {results, title} = await readDpePlus(cp, DPE, GES, superficie, date);
-        console.log("geoloca" ,results, "geoloca" );
+    
         // Traitez chaque élément de la collection
         const coordinatesCollection = await Promise.all(results.map(async (item) => {
             const address = item['Adresse_(BAN)'];
 
-            // Séparez les parties de l'adresse
-            const addressParts = address.split(' ');
-            console.log(addressParts);
-            // Assurez-vous que les indices sont corrects en fonction de votre structure d'adresse
-            const street = addressParts.slice(0, -2).join(' '); // Inclut le premier et exclut les deux derniers éléments
-            console.log(street);
-            const postalcode = parseInt(addressParts[addressParts.length - 2]);
-            console.log(postalcode);
-            const city = addressParts.slice(addressParts.indexOf(postalcode.toString()) + 1).join(' '); // Prend tout après le code postal
-            console.log(city);
-            console.log("street", street, "city", city, "postal", postalcode);
+            // Utilisez une expression régulière pour extraire la partie numérique (code postal)
+            const postalCodeMatch = address.match(/\b\d{5}\b/);
+            const postalCode = postalCodeMatch ? parseInt(postalCodeMatch[0]) : null;
+            
+            // Utilisez la partie numérique pour diviser l'adresse en street et city
+            const addressParts = postalCodeMatch ? address.split(postalCodeMatch[0]) : [address];
+            const street = addressParts[0].trim();
+            const city = addressParts[1].trim();
+            
+            console.log("street:", street, "city:", city, "postalCode:", postalCode);
+            
                 // Appel à l'API de géolocalisation
                 const response = await axios.get('https://nominatim.openstreetmap.org/search', {
                     params: {
                         street: street,
                         city: city,
-                        postalcode: postalcode,
+                        postalcode: postalCode,
                         format: 'geojson'
                     }
                 });
@@ -309,8 +344,8 @@ exports.extractDataFromSite = async (url, email) => {
        console.log(formattedDate,ges,dpe,surface,postalCode);
         // Envoyez la réponse JSON
         result = await exports.getGeolocationPlus(postalCode, dpe, ges, surface, formattedDate, email);
-        console.log(result);
-        return result;
+       console.log(result);
+      return result;
         
     } catch (error) {
         console.error('Extraction error:', error);
