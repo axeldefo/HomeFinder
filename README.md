@@ -23,10 +23,9 @@ Technologies clés utilisées
     Et d'autres bibliothèques populaires pour diverses fonctionnalités.
 
 Comment lancer l'application
-
-sql
-
 npm install
+
+
 node app.js
 
 L'application sera ensuite accessible à l'adresse http://localhost:3000.
