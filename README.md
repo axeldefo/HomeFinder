@@ -28,4 +28,8 @@ npm install
 
 node app.js
 
+
+
+Pour lancer le batch : node ./BATCH/batch.js
+
 L'application sera ensuite accessible à l'adresse http://localhost:3000.
