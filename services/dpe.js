@@ -5,6 +5,8 @@ const axios = require('axios');
 const UserModel = require('../models/users');
 const cheerio = require('cheerio');
 const moment = require('moment');
+//dotenv
+require('dotenv').config();
 
 function formatDate(date) {
     const year = date.getFullYear();
@@ -205,7 +207,7 @@ exports.getGeolocation = async (cp, DPE, GES, email) => {
             const city = addressParts.slice(addressParts.indexOf(postalcode.toString()) + 1).join(' '); // Prend tout après le code postal
 
                 // Appel à l'API de géolocalisation
-                const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                const response = await axios.get(process.env.GEOLOC, {
                     params: {
                         street: street,
                         city: city,
@@ -259,7 +261,7 @@ exports.getGeolocationPlus = async (cp, DPE, GES, superficie, date, email) => {
             console.log("street:", street, "city:", city, "postalCode:", postalCode);
             
                 // Appel à l'API de géolocalisation
-                const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                const response = await axios.get(process.env.GEOLOC, {
                     params: {
                         street: street,
                         city: city,

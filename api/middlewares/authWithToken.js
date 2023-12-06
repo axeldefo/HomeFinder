@@ -18,9 +18,8 @@ function authenticateToken(req, res, next) {
         return res.sendStatus(401)
       }
       // on récupère le payload qui contient l'id de l'utilisateur authentifié
-      req.user = user;
+      req.email= user.email;
       
-      console.log(req.user);
       next();
     });
   }
